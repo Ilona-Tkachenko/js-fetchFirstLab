@@ -3,11 +3,41 @@
 
 "https://jsonplaceholder.typicode.com/users - адреса куди робити запит"
 
+const https = require('https');
 
 function deleteUser(id) {
-  // Ваш код
-}
+    const options = {
+        hostname: 'jsonplaceholder.typicode.com',
+        path: `/users/${id}`,
+        method: 'DELETE'
+    };
 
-console.log(deleteUser(1));
+    return new Promise((resolve, reject) => {
+        const req = https.request(options, (response) => {
+            let data = '';
+
+            response.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            response.on('end', () => {
+                try {
+                    resolve({
+                        status: response.statusCode,
+                        message: 'User deleted successfully'
+                    });
+                } catch (error) {
+                    reject(new Error('Помилка при обробці відповіді: ' + error.message));
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            reject(new Error('Помилка при запиті: ' + error.message));
+        });
+
+        req.end();
+    });
+}
 
 module.exports = deleteUser;
